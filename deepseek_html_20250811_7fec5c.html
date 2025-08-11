@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Instant Money Transfer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .logo {
+            font-size: 60px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        button {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .loading {
+            display: none;
+            font-size: 30px;
+            margin: 10px 0;
+            animation: spin 1s linear infinite;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .prank-emoji {
+            font-size: 50px;
+            margin: 10px 0;
+            display: none;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <span class="logo">💰</span>
+        <h1>Instant Money Transfer</h1>
+        
+        <div class="input-group">
+            <label for="account">Recipient Account Number</label>
+            <input type="text" id="account" placeholder="Enter 16-digit account number">
+        </div>
+        
+        <div class="input-group">
+            <label for="amount">Amount to Send ($)</label>
+            <input type="number" id="amount" placeholder="Enter amount">
+        </div>
+        
+        <button id="send-btn">
+            <span id="btn-text">Transfer Money Now</span>
+            <span class="loading" id="spinner">🔄</span>
+        </button>
+        
+        <div class="progress-bar" id="progress-container">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <div class="result" id="result">
+            <div id="status-text">Enter details to transfer money securely</div>
+            <div class="prank-emoji" id="prank-emoji">😂</div>
+        </div>
+    </div>
+
+    <script>
+        const sendBtn = document.getElementById('send-btn');
+        const accountInput = document.getElementById('account');
+        const amountInput = document.getElementById('amount');
+        const resultDiv = document.getElementById('result');
+        const statusText = document.getElementById('status-text');
+        const spinner = document.getElementById('spinner');
+        const btnText = document.getElementById('btn-text');
+        const progressContainer = document.getElementById('progress-container');
+        const progress = document.getElementById('progress');
+        const prankEmoji = document.getElementById('prank-emoji');
+
+        sendBtn.addEventListener('click', () => {
+            const account = accountInput.value.trim();
+            const amount = amountInput.value.trim();
+            
+            if (!account || !amount) {
+                statusText.innerHTML = '⚠️ Please enter both account number and amount!';
+                statusText.style.color = '#ff4757';
+                return;
+            }
+            
+            if (isNaN(amount)) {
+                statusText.innerHTML = '⚠️ Please enter a valid amount!';
+                statusText.style.color = '#ff4757';
+                return;
+            }
+            
+            // Show loading state
+            btnText.style.display = 'none';
+            spinner.style.display = 'block';
+            sendBtn.disabled = true;
+            progressContainer.style.display = 'block';
+            
+            // Simulate progress
+            let progressValue = 0;
+            const progressInterval = setInterval(() => {
+                progressValue += Math.random() * 10;
+                progress.style.width = `${Math.min(progressValue, 100)}%`;
+                
+                if (progressValue >= 100) {
+                    clearInterval(progressInterval);
+                    completeTransfer();
+                }
+            }, 300);
+            
+            function completeTransfer() {
+                // Show success message
+                spinner.style.display = 'none';
+                btnText.style.display = 'inline';
+                sendBtn.disabled = false;
+                statusText.innerHTML = `✅ Success! $${amount} sent to account ${account}.`;
+                statusText.style.color = '#2ed573';
+                
+                // After 5 seconds, reveal the prank
+                setTimeout(() => {
+                    statusText.innerHTML = `PRANK ALERT!<br><br>Did you really think this was real?<br>No money was transferred!`;
+                    statusText.style.color = '#ff4757';
+                    prankEmoji.style.display = 'block';
+                    
+                    // Shake animation
+                    resultDiv.style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => {
+                        resultDiv.style.animation = '';
+                    }, 500);
+                    
+                    // Create confetti effect
+                    createConfetti();
+                }, 5000);
+            }
+            
+            function createConfetti() {
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'];
+                const container = document.querySelector('.container');
+                
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = '-10px';
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    container.appendChild(confetti);
+                    
+                    // Animate confetti
+                    setTimeout(() => {
+                        confetti.style.opacity = '1';
+                        confetti.style.top = '100%';
+                        confetti.style.transition = `top ${Math.random() * 2 + 1}s linear, opacity ${Math.random() * 2 + 1}s linear`;
+                        
+                        setTimeout(() => {
+                            confetti.remove();
+                        }, 3000);
+                    }, i * 50);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
